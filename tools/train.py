@@ -117,6 +117,8 @@ def train(cfg):
 
 
 def main():
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('172.26.3.54', port=12350, stdoutToServer=True, stderrToServer=True)
     parser = argparse.ArgumentParser(description="ReID Baseline Training")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
@@ -125,7 +127,6 @@ def main():
                         nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
-
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
 
     if args.config_file != "":
