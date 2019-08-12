@@ -21,6 +21,10 @@ from utils.logger import setup_logger
 
 
 def main():
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('172.26.3.54', port=12350, stdoutToServer=True, stderrToServer=True)
+
+
     parser = argparse.ArgumentParser(description="ReID Baseline Inference")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
