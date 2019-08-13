@@ -7,7 +7,7 @@
 from torch.utils.data import DataLoader
 
 from .collate_batch import train_collate_fn, val_collate_fn
-from .datasets import init_dataset, ImageDataset
+from .datasets import init_datasets, ImageDataset, init_multidataset
 from .samplers import RandomIdentitySampler, RandomIdentitySampler_alignedreid  # New add by gu
 from .transforms import build_transforms
 
@@ -16,11 +16,13 @@ def make_data_loader(cfg):
     train_transforms = build_transforms(cfg, is_train=True)
     val_transforms = build_transforms(cfg, is_train=False)
     num_workers = cfg.DATALOADER.NUM_WORKERS
-    if len(cfg.DATASETS.NAMES) == 1:
-        dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
-    else:
-        # TODO: add multi dataset to train
-        dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
+    # if len(cfg.DATASETS.NAMES) == 1:
+    #     dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
+    # else:
+    #     # TODO: add multi dataset to train
+    #     dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
+    datasets = init_datasets(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
+    dataset = init_multidataset(datasets)
 
     num_classes = dataset.num_train_pids
     train_set = ImageDataset(dataset.train, train_transforms)
