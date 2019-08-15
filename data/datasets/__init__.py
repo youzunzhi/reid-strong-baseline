@@ -31,9 +31,24 @@ def init_dataset(name, *args, **kwargs):
 
 def init_datasets(names, *args, **kwargs):
     datasets = []
+    base_train_pid = 0
+    base_train_camid = 0
+    base_query_pid = 0
+    base_query_camid = 0
+    base_gallery_pid = 0
+    base_gallery_camid = 0
     for name in names:
-        datasets.append(init_dataset(name, *args, **kwargs))
-
+        datasets.append(init_dataset(name,
+                                     base_train_pid=base_train_pid, base_train_camid=base_train_camid,
+                                     base_query_pid=base_query_pid, base_query_camid=base_query_camid,
+                                     base_gallery_pid=base_gallery_pid, base_gallery_camid=base_gallery_camid,
+                                     *args, **kwargs))
+        base_train_pid += datasets[-1].num_train_pids
+        base_train_camid += datasets[-1].num_train_cams
+        base_query_pid += datasets[-1].num_query_pids
+        base_query_camid += datasets[-1].num_query_cams
+        base_gallery_pid += datasets[-1].num_gallery_pids
+        base_gallery_camid += datasets[-1].num_gallery_cams
     return datasets
 
 class Multidataset(BaseImageDataset):

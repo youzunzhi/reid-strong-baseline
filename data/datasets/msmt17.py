@@ -28,7 +28,10 @@ class MSMT17(BaseImageDataset):
     """
     dataset_dir = 'msmt17'
 
-    def __init__(self,root='/home/haoluo/data', verbose=True, **kwargs):
+    def __init__(self,root='/home/haoluo/data', verbose=True,
+                 base_train_pid=0, base_train_camid=0,
+                 base_query_pid=0, base_query_camid=0,
+                 base_gallery_pid=0, base_gallery_camid=0, **kwargs):
         super(MSMT17, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)
         # self.train_dir = osp.join(self.dataset_dir, 'MSMT17_V2/mask_train_v2')
@@ -45,10 +48,10 @@ class MSMT17(BaseImageDataset):
         self.list_gallery_path = osp.join(self.dataset_dir, 'MSMT17_V1/list_gallery.txt')
 
         self._check_before_run()
-        train = self._process_dir(self.train_dir, self.list_train_path)
+        train = self._process_dir(self.train_dir, self.list_train_path, base_pid=base_train_pid, base_camid=base_train_camid)
         #val, num_val_pids, num_val_imgs = self._process_dir(self.train_dir, self.list_val_path)
-        query = self._process_dir(self.test_dir, self.list_query_path)
-        gallery = self._process_dir(self.test_dir, self.list_gallery_path)
+        query = self._process_dir(self.test_dir, self.list_query_path, base_pid=base_query_pid, base_camid=base_query_camid)
+        gallery = self._process_dir(self.test_dir, self.list_gallery_path, base_pid=base_gallery_pid, base_camid=base_gallery_camid)
         if verbose:
             print("=> MSMT17 loaded")
             self.print_dataset_statistics(train, query, gallery)
@@ -70,7 +73,7 @@ class MSMT17(BaseImageDataset):
         if not osp.exists(self.test_dir):
             raise RuntimeError("'{}' is not available".format(self.test_dir))
 
-    def _process_dir(self, dir_path, list_path):
+    def _process_dir(self, dir_path, list_path, base_pid=0, base_camid=0):
         with open(list_path, 'r') as txt:
             lines = txt.readlines()
         dataset = []
@@ -79,11 +82,13 @@ class MSMT17(BaseImageDataset):
             img_path, pid = img_info.split(' ')
             pid = int(pid)  # no need to relabel
             camid = int(img_path.split('_')[2])
+            pid += base_pid
+            camid += base_camid
             img_path = osp.join(dir_path, img_path)
             dataset.append((img_path, pid, camid))
             pid_container.add(pid)
 
         # check if pid starts from 0 and increments with 1
-        for idx, pid in enumerate(pid_container):
-            assert idx == pid, "See code comment for explanation"
+        # for idx, pid in enumerate(pid_container):
+        #     assert idx == pid, "See code comment for explanation"
         return dataset

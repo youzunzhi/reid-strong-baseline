@@ -25,7 +25,10 @@ class Market1501(BaseImageDataset):
     """
     dataset_dir = 'market1501'
 
-    def __init__(self, root='/home/haoluo/data', verbose=True, **kwargs):
+    def __init__(self, root='/home/haoluo/data', verbose=True,
+                 base_train_pid=0, base_train_camid=0,
+                 base_query_pid=0, base_query_camid=0,
+                 base_gallery_pid=0, base_gallery_camid=0, **kwargs):
         super(Market1501, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)
         self.train_dir = osp.join(self.dataset_dir, 'bounding_box_train')
@@ -34,9 +37,9 @@ class Market1501(BaseImageDataset):
 
         self._check_before_run()
 
-        train = self._process_dir(self.train_dir, relabel=True)
-        query = self._process_dir(self.query_dir, relabel=False)
-        gallery = self._process_dir(self.gallery_dir, relabel=False)
+        train = self._process_dir(self.train_dir, relabel=True, base_pid=base_train_pid, base_camid=base_train_camid)
+        query = self._process_dir(self.query_dir, relabel=False, base_pid=base_query_pid, base_camid=base_query_camid)
+        gallery = self._process_dir(self.gallery_dir, relabel=False, base_pid=base_gallery_pid, base_camid=base_gallery_camid)
 
         if verbose:
             print("=> Market1501 loaded")
@@ -61,7 +64,7 @@ class Market1501(BaseImageDataset):
         if not osp.exists(self.gallery_dir):
             raise RuntimeError("'{}' is not available".format(self.gallery_dir))
 
-    def _process_dir(self, dir_path, relabel=False):
+    def _process_dir(self, dir_path, relabel=False, base_pid=0, base_camid=0):
         img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
         pattern = re.compile(r'([-\d]+)_c(\d)')
 
@@ -69,6 +72,7 @@ class Market1501(BaseImageDataset):
         for img_path in img_paths:
             pid, _ = map(int, pattern.search(img_path).groups())
             if pid == -1: continue  # junk images are just ignored
+            pid += base_pid
             pid_container.add(pid)
         pid2label = {pid: label for label, pid in enumerate(pid_container)}
 
@@ -79,6 +83,8 @@ class Market1501(BaseImageDataset):
             assert 0 <= pid <= 1501  # pid == 0 means background
             assert 1 <= camid <= 6
             camid -= 1  # index starts from 0
+            pid += base_pid
+            camid += base_camid
             if relabel: pid = pid2label[pid]
             dataset.append((img_path, pid, camid))
 
